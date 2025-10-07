@@ -1,0 +1,10 @@
+{
+  "theme": "Galatasaray",
+  "font_size": 13,
+  "notifications_enabled": true,
+  "notification_interval": 30,
+  "flash_speed": 1000,
+  "completed_task_timeout": 12,
+  "clock_format": "24 Saat",
+  "auto_refresh": true
+}
