@@ -21,16 +21,19 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Debug repository contents
-      shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+    - name: Debug repository contents (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
       run: |
-        if [ "${{ runner.os }}" == "Linux" ]; then
-          ls -la
-          ls -la data/
-        else
-          dir /a
-          dir data /a
-        fi
+        ls -la
+        ls -la data/
+
+    - name: Debug repository contents (Windows)
+      if: matrix.os == 'windows-2022'
+      shell: pwsh
+      run: |
+        dir -Force
+        dir data -Force
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
@@ -38,35 +41,42 @@ jobs:
         python-version: '3.12'
 
     - name: Clear pip cache
+      shell: bash
       run: |
         python -m pip install --upgrade pip
         pip cache purge
 
     - name: Install dependencies
+      shell: bash
       run: |
         pip install -r requirements.txt --retries 3 --timeout 60
       timeout-minutes: 10
 
     - name: Debug installed packages
+      shell: bash
       run: |
         pip list
 
     - name: Build with PyInstaller
+      shell: bash
       run: |
         pyinstaller gs.spec
       env:
         PYTHONPATH: ${{ github.workspace }}
 
-    - name: Debug build output
-      shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
+    - name: Debug build output (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
       run: |
-        if [ "${{ runner.os }}" == "Linux" ]; then
-          ls -la dist/
-          ls -la dist/GS_Huzurevi/
-        else
-          dir dist /a
-          dir dist/GS_Huzurevi /a
-        fi
+        ls -la dist/
+        ls -la dist/GS_Huzurevi/
+
+    - name: Debug build output (Windows)
+      if: matrix.os == 'windows-2022'
+      shell: pwsh
+      run: |
+        dir dist -Force
+        dir dist/GS_Huzurevi -Force
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
