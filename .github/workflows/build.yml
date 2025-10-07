@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45  # Genel zaman aşımını artır
     strategy:
       matrix:
         os: [ubuntu-latest, windows-2022]
@@ -49,8 +49,8 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        pip install -r requirements.txt --retries 3 --timeout 60
-      timeout-minutes: 10
+        pip install -r requirements.txt --retries 5 --timeout 120
+      timeout-minutes: 15  # pip install için zaman aşımını artır
 
     - name: Debug installed packages
       shell: bash
@@ -60,9 +60,12 @@ jobs:
     - name: Build with PyInstaller
       shell: bash
       run: |
-        pyinstaller gs.spec
+        pyinstaller gs.spec --log-level DEBUG
       env:
         PYTHONPATH: ${{ github.workspace }}
+        # Windows DLL sorunları için ek PATH
+        PATH: ${{ github.workspace }}\data;C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\site-packages\PyQt5\Qt5\bin;${{ env.PATH }}
+      timeout-minutes: 20  # PyInstaller için zaman aşımını artır
 
     - name: Debug build output (Linux)
       if: matrix.os == 'ubuntu-latest'
