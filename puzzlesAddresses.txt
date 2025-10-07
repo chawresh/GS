@@ -1,2 +1,0 @@
-PyQt5==5.15.10
-PyInstaller==6.10.0
