@@ -3,7 +3,7 @@ name: Build GS.py App
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]  # Tag push'ta release oluştur
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
