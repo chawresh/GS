@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022]  # windows-latest yerine windows-2022, daha kararlı
+        os: [ubuntu-latest, windows-2022]
 
     steps:
     - name: Checkout repository
@@ -24,9 +24,15 @@ jobs:
         retry-wait: 5
 
     - name: Debug repository contents
+      shell: bash
       run: |
-        ls -la
-        ls -la data/
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          ls -la
+          ls -la data/
+        else
+          dir /a
+          dir data /a
+        fi
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
@@ -54,9 +60,15 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
 
     - name: Debug build output
+      shell: bash
       run: |
-        ls -la dist/
-        ls -la dist/GS_Huzurevi/
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          ls -la dist/
+          ls -la dist/GS_Huzurevi/
+        else
+          dir dist /a
+          dir dist/GS_Huzurevi /a
+        fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
