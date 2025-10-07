@@ -1,52 +1,53 @@
-name: Build EXE and APP
-
+name: Build GS.py App
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    tags: [ 'v*' ]  # Tag push'ta release oluştur
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10.6'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller pandas numpy PyQt5 qtawesome reportlab mplcursors openpyxl
-    - name: Build EXE
-      run: |
-        pyinstaller --onefile --noconsole --icon=logo.ico --hidden-import=PyQt5.QtWidgets --hidden-import=PyQt5.QtGui --hidden-import=PyQt5.QtCore --hidden-import=qtawesome --hidden-import=reportlab --add-data "DejaVuSans.ttf;." --add-data "Helvetica.ttf;." "GSYV.py"
-    - name: Upload EXE
-      uses: actions/upload-artifact@v4
-      with:
-        name: windows-exe
-        path: dist/GSYV.exe
-        if-no-files-found: error  # Dosya bulunamazsa hata ver
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
-  build-macos:
-    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10.6'
+        python-version: '3.12'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pandas numpy PyQt5 qtawesome reportlab mplcursors openpyxl
-    - name: Build APP
+        pip install -r requirements.txt
+
+    - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --noconsole --icon=logo.icns --hidden-import=PyQt5.QtWidgets --hidden-import=PyQt5.QtGui --hidden-import=PyQt5.QtCore --hidden-import=qtawesome --hidden-import=reportlab --add-data "DejaVuSans.ttf:." --add-data "Helvetica.ttf:." "GSYV.py"
-    - name: Upload APP
+        pyinstaller gs.spec
+
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: macos-app
-        path: dist/GSYV.app
-        if-no-files-found: error  # Dosya bulunamazsa hata ver
+        name: GS_Huzurevi-${{ matrix.os }}
+        path: |
+          dist/GS_Huzurevi
+          dist/GS_Huzurevi.exe
+        retention-days: 30
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/GS_Huzurevi*
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
