@@ -72,7 +72,7 @@ THEMES = {
     "Galatasaray": {
         "bg_start": "#C0392B", "bg_end": "#F1C40F",
         "button": "#C0392B", "button_hover": "#A93226",
-        "table_bg": "#333333", "text": "#ffffff"
+        "table_bg": "#333333", "text": "#000000"
     },
     "Koyu": {
         "bg_start": "#1E1E1E", "bg_end": "#1E1E1E",
@@ -195,24 +195,24 @@ class SplashScreen(QWidget):
 
         self.title = QLabel("Galatasaraylılar Yurdu Huzur Evi")
         self.title.setFont(QFont("Helvetica", 28, QFont.Bold))
-        self.title.setStyleSheet("color:white;")
+        self.title.setStyleSheet("color:#000000;")
         layout.addWidget(self.title, alignment=Qt.AlignCenter)
 
         self.welcome = QLabel("Sevgi Yuvamıza Hoş Geldiniz!")
         self.welcome.setFont(QFont("Helvetica", 18))
-        self.welcome.setStyleSheet("color:white;")
+        self.welcome.setStyleSheet("color:#000000;")
         layout.addWidget(self.welcome, alignment=Qt.AlignCenter)
 
         self.yurt_info = QTextEdit()
         self.yurt_info.setReadOnly(True)
         self.yurt_info.setHtml("""
-            <p style='text-align: center; color: white;'>
+            <p style='text-align: center; color: #000000;'>
                 <b>Galatasaraylılar Yurdu</b><br>
                 500 yılı aşkın tarihiyle bir eğitim, kültür, sanat ve spor ocağı olan Galatasaray Lisesi’nden kaynaklanan kuruluşlardan biri olan Galatasaraylılar Yardımlaşma Vakfı tarafından 1977 yılında kurulmuştur.<br>
                 Florya’da 5000 m² alana inşa edilmiş, otel konforunda odalar ve ferah ortak alanlarla hizmet vermektedir.
             </p>
         """)
-        self.yurt_info.setStyleSheet("background: transparent; border: none; color: white;")
+        self.yurt_info.setStyleSheet("background: transparent; border: none; color: #000000;")
         self.yurt_info.setFixedHeight(100)
         layout.addWidget(self.yurt_info)
 
@@ -223,7 +223,7 @@ class SplashScreen(QWidget):
             Instagram: <a href='https://instagram.com/mstf.akbal' style='color:#F1C40F;'>@mstf.akbal</a>
         """)
         self.dev_info.setOpenExternalLinks(True)
-        self.dev_info.setStyleSheet("color:white; font-size:14px;")
+        self.dev_info.setStyleSheet("color:#000000; font-size:14px;")
         layout.addWidget(self.dev_info, alignment=Qt.AlignCenter)
 
         self.progress = QProgressBar()
@@ -316,7 +316,7 @@ class NotificationDialog(QDialog):
 
         label = QLabel(message)
         label.setStyleSheet(f"""
-            color: white;
+            color: #000000;
             font-family: Helvetica;
             font-size: {font_size}px;
             font-weight: bold;
@@ -845,7 +845,7 @@ class PatientTaskApp(QMainWindow):
         self.center_clock.setAlignment(Qt.AlignCenter)
         self.center_clock.setStyleSheet("""
             background: qlineargradient(x1:0 y1:0 x2:1 y2:1, stop:0 #C0392B, stop:1 #F1C40F);
-            color: white;
+            color: #000000;
             border-radius: 15px;
             padding: 15px;
             font-family: Helvetica;
@@ -917,13 +917,32 @@ class PatientTaskApp(QMainWindow):
         stats.addStretch()
         layout.addLayout(stats)
 
-        self.task_scroll = QScrollArea()
-        self.task_scroll.setWidgetResizable(True)
-        self.task_container = QWidget()
-        self.task_v = QVBoxLayout(self.task_container)
-        self.task_v.setAlignment(Qt.AlignCenter)
-        self.task_scroll.setWidget(self.task_container)
-        layout.addWidget(self.task_scroll)
+        self.tasks_subtab = QTabWidget()
+        # Daytime tab
+        self.day_widget = QWidget()
+        day_layout = QVBoxLayout(self.day_widget)
+        self.day_scroll = QScrollArea()
+        self.day_scroll.setWidgetResizable(True)
+        self.day_container = QWidget()
+        self.day_v = QVBoxLayout(self.day_container)
+        self.day_v.setAlignment(Qt.AlignCenter)
+        self.day_scroll.setWidget(self.day_container)
+        day_layout.addWidget(self.day_scroll)
+        self.tasks_subtab.addTab(self.day_widget, "Gündüz Vardiyası (08:00-20:00)")
+
+        # Night tab
+        self.night_widget = QWidget()
+        night_layout = QVBoxLayout(self.night_widget)
+        self.night_scroll = QScrollArea()
+        self.night_scroll.setWidgetResizable(True)
+        self.night_container = QWidget()
+        self.night_v = QVBoxLayout(self.night_container)
+        self.night_v.setAlignment(Qt.AlignCenter)
+        self.night_scroll.setWidget(self.night_container)
+        night_layout.addWidget(self.night_scroll)
+        self.tasks_subtab.addTab(self.night_widget, "Akşam Gece Vardiyası (20:00-08:00)")
+
+        layout.addWidget(self.tasks_subtab)
         self.tabs.addTab(w, "Görevler")
 
     def build_patients_tab(self):
@@ -960,7 +979,6 @@ class PatientTaskApp(QMainWindow):
         self.patient_details.setStyleSheet("""
             background: rgba(255,255,255,0.1);
             border: 1px solid #C0392B;
-            color: white;
             border-radius: 10px;
             padding: 10px;
         """)
@@ -1037,7 +1055,7 @@ class PatientTaskApp(QMainWindow):
         header_layout.addWidget(logo)
         title = QLabel("Galatasaraylılar Yurdu Huzur Evi")
         title.setFont(QFont("Helvetica", 24, QFont.Bold))
-        title.setStyleSheet("color: white; padding: 10px;")
+        title.setStyleSheet("color: #000000; padding: 10px;")
         header_layout.addWidget(title)
         header_layout.addStretch()
         l.addWidget(header)
@@ -1056,7 +1074,6 @@ class PatientTaskApp(QMainWindow):
         desc.setStyleSheet("""
             background: rgba(255,255,255,0.1);
             border: none;
-            color: white;
             border-radius: 10px;
             padding: 10px;
         """)
@@ -1078,7 +1095,7 @@ class PatientTaskApp(QMainWindow):
             </p>
         """)
         contact_info.setOpenExternalLinks(True)
-        contact_info.setStyleSheet("color: white;")
+        contact_info.setStyleSheet("")
         contact_layout.addWidget(contact_info)
         l.addWidget(contact)
         l.addStretch()
@@ -1149,13 +1166,13 @@ class PatientTaskApp(QMainWindow):
 
         title = QLabel("Geliştirici")
         title.setFont(QFont("Helvetica", 28, QFont.Bold))
-        title.setStyleSheet("color: white; margin-bottom: 10px;")
+        title.setStyleSheet("color: #000000; margin-bottom: 10px;")
         card_layout.addWidget(title)
 
         dev_info = QLabel("""
             <div style='text-align: center; line-height: 1.8;'>
                 <h2 style='color: #F1C40F; font-size: 24px; margin: 0;'>Mustafa AKBAL</h2>
-                <p style='font-size: 16px; color: white;'>
+                <p style='font-size: 16px; color: #000000;'>
                     <b>E-posta:</b> <a href='mailto:mstf.akbal@gmail.com' style='color: #F1C40F; text-decoration: none;'>mstf.akbal@gmail.com</a><br>
                     <b>Telefon:</b> +90 544 748 5959<br>
                     <b>Instagram:</b> <a href='https://instagram.com/mstf.akbal' style='color: #F1C40F; text-decoration: none;'>@mstf.akbal</a><br><br>
@@ -1164,7 +1181,7 @@ class PatientTaskApp(QMainWindow):
             </div>
         """)
         dev_info.setOpenExternalLinks(True)
-        dev_info.setStyleSheet("color: white; font-family: Helvetica; font-size: 16px;")
+        dev_info.setStyleSheet("font-family: Helvetica; font-size: 16px;")
         dev_info.setTextInteractionFlags(Qt.TextBrowserInteraction)
         card_layout.addWidget(dev_info)
 
@@ -1189,7 +1206,7 @@ class PatientTaskApp(QMainWindow):
 
         copyright_label = QLabel("© 2025 Mustafa AKBAL. Tüm Hakları Saklıdır.")
         copyright_label.setStyleSheet("""
-            color: white;
+            color: #000000;
             font-family: Helvetica;
             font-size: 14px;
             font-style: italic;
@@ -1566,9 +1583,31 @@ class PatientTaskApp(QMainWindow):
             self.update_task_sections()
             self.update_selected_patient()
 
+    def is_daytime_task(self, t):
+        if t["time_type"] == "Gün İçinde":
+            return True
+        if t["time_type"] == "Akşam":
+            return False
+        if t["time"]:
+            try:
+                hh, mm = map(int, t["time"].split(":"))
+                t_time = time(hh, mm)
+                day_start = time(8, 0)
+                day_end = time(20, 0)
+                return day_start <= t_time < day_end
+            except:
+                pass
+        return False
+
     def update_task_sections(self):
-        while self.task_v.count():
-            it = self.task_v.takeAt(0)
+        # Clear both containers
+        while self.day_v.count():
+            it = self.day_v.takeAt(0)
+            w = it.widget()
+            if w:
+                w.deleteLater()
+        while self.night_v.count():
+            it = self.night_v.takeAt(0)
             w = it.widget()
             if w:
                 w.deleteLater()
@@ -1576,13 +1615,18 @@ class PatientTaskApp(QMainWindow):
         now = datetime.now()
         today = date.today()
         tomorrow = today + timedelta(days=1)
-        due = []
-        completed = []
-        upcoming = []
-        cancelled = []
+        due_day = []
+        completed_day = []
+        upcoming_day = []
+        cancelled_day = []
+        due_night = []
+        completed_night = []
+        upcoming_night = []
+        cancelled_night = []
         day_start = time(8, 0)
         day_end = time(20, 0)
         timeout_hours = self.settings.get("completed_task_timeout", 4)
+        overdue_threshold = timedelta(hours=24)
 
         # Bugün tamamlanan görevleri yükle
         conn = get_conn()
@@ -1611,7 +1655,11 @@ class PatientTaskApp(QMainWindow):
                 t_time = time(12, 0)
                 t_dt = datetime.combine(t_date, t_time)
 
-            is_daytime = day_start <= t_time < day_end if t["time"] else t["time_type"] == "Gün İçinde"
+            # Skip if more than 24 hours overdue
+            if t_dt < now - overdue_threshold:
+                continue
+
+            is_daytime = self.is_daytime_task(t)
             is_due = (t_dt <= now and (is_daytime or t["time_type"] == "Akşam") and not t["cancelled"]) or (t["notified"] == 1 and not t["cancelled"])
 
             is_today = t_date == today
@@ -1648,21 +1696,38 @@ class PatientTaskApp(QMainWindow):
                     pass
 
             if t["cancelled"] and is_today:
-                cancelled.append((t, t_dt))
+                if is_daytime:
+                    cancelled_day.append((t, t_dt))
+                else:
+                    cancelled_night.append((t, t_dt))
             elif t["id"] in completed_tasks and is_today:
-                completed.append((t, t_dt))
+                if is_daytime:
+                    completed_day.append((t, t_dt))
+                else:
+                    completed_night.append((t, t_dt))
             elif is_due and t["id"] not in completed_tasks:
-                due.append((t, t_dt))
+                if is_daytime:
+                    due_day.append((t, t_dt))
+                else:
+                    due_night.append((t, t_dt))
             elif is_next_24h and t["id"] not in completed_tasks:
-                upcoming.append((t, t_dt))
+                if is_daytime:
+                    upcoming_day.append((t, t_dt))
+                else:
+                    upcoming_night.append((t, t_dt))
 
-        self.total_btn.setText(f"Toplam: {len(completed) + len(due) + len(cancelled)}")
-        self.done_btn.setText(f"Tamamlanmış: {len(completed)}")
-        self.wait_btn.setText(f"Vakti Gelen: {len(due)}")
-        self.upcoming_btn.setText(f"Gelecek: ({len(upcoming)})")
-        self.cancel_btn.setText(f"İptal: {len(cancelled)}")
+        # Update stats (overall)
+        total_day = len(completed_day) + len(due_day) + len(cancelled_day)
+        total_night = len(completed_night) + len(due_night) + len(cancelled_night)
+        self.total_btn.setText(f"Toplam: {total_day + total_night}")
+        self.done_btn.setText(f"Tamamlanmış: {len(completed_day) + len(completed_night)}")
+        self.wait_btn.setText(f"Vakti Gelen: {len(due_day) + len(due_night)}")
+        self.upcoming_btn.setText(f"Gelecek: ({len(upcoming_day) + len(upcoming_night)})")
+        self.cancel_btn.setText(f"İptal: {len(cancelled_day) + len(cancelled_night)}")
 
-        def make_section(title, items, is_due_section=False):
+        def make_section(title, items, is_due_section=False, container=None):
+            if not items:
+                return
             gb = QGroupBox(f"{title} ({len(items)})")
             vb = QVBoxLayout(gb)
             for t, t_dt in items:
@@ -1684,7 +1749,7 @@ class PatientTaskApp(QMainWindow):
                 hl.addWidget(cancel_btn)
 
                 roww.setProperty("task_id", t["id"])
-                roww.setProperty("is_due", is_due)
+                roww.setProperty("is_due", is_due_section)
                 roww.setProperty("done", t["id"] in completed_tasks)
                 roww.setProperty("cancelled", bool(t["cancelled"]))
                 roww.setProperty("is_due_section", is_due_section)
@@ -1701,16 +1766,19 @@ class PatientTaskApp(QMainWindow):
                 done_btn.clicked.connect(partial(self.mark_done, t["id"]))
                 notdone_btn.clicked.connect(partial(self.mark_notdone, t["id"]))
                 cancel_btn.clicked.connect(partial(self.mark_cancelled, t["id"]))
-            return gb
+            container.addWidget(gb)
 
-        if due:
-            self.task_v.addWidget(make_section("Vakti Gelenler", due, is_due_section=True))
-        if completed:
-            self.task_v.addWidget(make_section("Tamamlanmış Görevler", completed))
-        if upcoming:
-            self.task_v.addWidget(make_section("Bir Sonraki Görevler", upcoming))
-        if cancelled:
-            self.task_v.addWidget(make_section("İptal Edilen Görevler", cancelled))
+        # Daytime sections
+        make_section("Vakti Gelenler", due_day, True, self.day_v)
+        make_section("Tamamlanmış Görevler", completed_day, False, self.day_v)
+        make_section("Bir Sonraki Görevler", upcoming_day, False, self.day_v)
+        make_section("İptal Edilen Görevler", cancelled_day, False, self.day_v)
+
+        # Night sections
+        make_section("Vakti Gelenler", due_night, True, self.night_v)
+        make_section("Tamamlanmış Görevler", completed_night, False, self.night_v)
+        make_section("Bir Sonraki Görevler", upcoming_night, False, self.night_v)
+        make_section("İptal Edilen Görevler", cancelled_night, False, self.night_v)
 
     def mark_done(self, task_id):
         if QMessageBox.question(self, "Onay", "Görevi tamamlandı olarak işaretlemek istiyor musunuz?") != QMessageBox.Yes:
@@ -1761,55 +1829,57 @@ class PatientTaskApp(QMainWindow):
 
     def update_flashing(self):
         self.flash_state = not self.flash_state
-        for i in range(self.task_v.count()):
-            item = self.task_v.itemAt(i)
-            if not item:
-                continue
-            w = item.widget()
-            if not w:
-                continue
-            # "Vakti Gelenler" başlığına sahip QGroupBox için her zaman yanıp sönme
-            if isinstance(w, QGroupBox) and w.title().startswith("Vakti Gelenler"):
-                color = "#F1C40F" if self.flash_state else "#E74C3C"
-                w.setStyleSheet(f"""
-                    QGroupBox {{
-                        background: #333333;
-                        color: white;
-                        border: 4px solid {color};
-                        border-radius: 8px;
-                        padding: 10px;
-                        font-family: Helvetica;
-                        font-size: 16px;
-                        font-weight: bold;
-                    }}
-                    QGroupBox::title {{
-                        color: white;
-                        subcontrol-origin: margin;
-                        subcontrol-position: top left;
-                        padding: 0 3px;
-                    }}
-                """)
-                continue  # Vakti Gelenler için işlemi bitir, altındaki roww'ları kontrol etmeye gerek yok
-
-            # Diğer görev satırları için mevcut mantık
-            for j in range(w.layout().count()):
-                roww = w.layout().itemAt(j).widget()
-                if not roww:
+        # Update flashing for both subtabs
+        for container, subtab in [(self.day_v, self.day_scroll), (self.night_v, self.night_scroll)]:
+            for i in range(container.count()):
+                item = container.itemAt(i)
+                if not item:
                     continue
-                is_due = roww.property("is_due")
-                done = roww.property("done")
-                cancelled = roww.property("cancelled")
-                is_due_section = roww.property("is_due_section")
-                if is_due_section and is_due and not done and not cancelled:
+                w = item.widget()
+                if not w:
+                    continue
+                # "Vakti Gelenler" başlığına sahip QGroupBox için her zaman yanıp sönme
+                if isinstance(w, QGroupBox) and w.title().startswith("Vakti Gelenler"):
                     color = "#F1C40F" if self.flash_state else "#E74C3C"
-                    roww.setStyleSheet(f"background:{color}; border-radius:8px; padding:6px; color:white;")
-                else:
-                    if done:
-                        roww.setStyleSheet("background:#2ecc71; border-radius:8px; padding:6px; color:white;")
-                    elif cancelled:
-                        roww.setStyleSheet("background:#555555; border-radius:8px; padding:6px; color:white;")
+                    w.setStyleSheet(f"""
+                        QGroupBox {{
+                            background: #333333;
+                            color: white;
+                            border: 4px solid {color};
+                            border-radius: 8px;
+                            padding: 10px;
+                            font-family: Helvetica;
+                            font-size: 16px;
+                            font-weight: bold;
+                        }}
+                        QGroupBox::title {{
+                            color: white;
+                            subcontrol-origin: margin;
+                            subcontrol-position: top left;
+                            padding: 0 3px;
+                        }}
+                    """)
+                    continue  # Vakti Gelenler için işlemi bitir, altındaki roww'ları kontrol etmeye gerek yok
+
+                # Diğer görev satırları için mevcut mantık
+                for j in range(w.layout().count()):
+                    roww = w.layout().itemAt(j).widget()
+                    if not roww:
+                        continue
+                    is_due = roww.property("is_due")
+                    done = roww.property("done")
+                    cancelled = roww.property("cancelled")
+                    is_due_section = roww.property("is_due_section")
+                    if is_due_section and is_due and not done and not cancelled:
+                        color = "#F1C40F" if self.flash_state else "#E74C3C"
+                        roww.setStyleSheet(f"background:{color}; border-radius:8px; padding:6px; color:white;")
                     else:
-                        roww.setStyleSheet("background:#7f8c8d; border-radius:8px; padding:6px; color:white;")
+                        if done:
+                            roww.setStyleSheet("background:#2ecc71; border-radius:8px; padding:6px; color:white;")
+                        elif cancelled:
+                            roww.setStyleSheet("background:#555555; border-radius:8px; padding:6px; color:white;")
+                        else:
+                            roww.setStyleSheet("background:#7f8c8d; border-radius:8px; padding:6px; color:white;")
 
     def check_notifications(self):
         if not self.settings.get("notifications_enabled", True):
@@ -1862,6 +1932,7 @@ class PatientTaskApp(QMainWindow):
         timeout_hours = self.settings.get("completed_task_timeout", 4)
         now = datetime.now()
         today = date.today()
+        overdue_threshold = timedelta(hours=24)
         
         for r in rows:
             include = False
@@ -1891,6 +1962,17 @@ class PatientTaskApp(QMainWindow):
             except Exception:
                 pass
             if include:
+                # Skip overdue
+                try:
+                    if r["time"] and r["time_type"] == "Saat Belirt":
+                        hh, mm = map(int, r["time"].split(":"))
+                        tdt = datetime.combine(sel, time(hh, mm))
+                    else:
+                        tdt = datetime.combine(sel, time(12, 0))
+                    if tdt < now - overdue_threshold:
+                        continue
+                except:
+                    pass
                 display.append((r, r["id"] in completed_tasks))
         
         self.calendar_table.setRowCount(0)
@@ -1934,6 +2016,7 @@ class PatientTaskApp(QMainWindow):
         timeout_hours = self.settings.get("completed_task_timeout", 4)
         now = datetime.now()
         today = date.today()
+        overdue_threshold = timedelta(hours=24)
         if kind == "all":
             cur.execute("SELECT t.*, p.name, p.surname FROM tasks t LEFT JOIN patients p ON p.room_number=t.room_number WHERE t.date=?", (today.isoformat(),))
         elif kind == "done":
@@ -1948,6 +2031,17 @@ class PatientTaskApp(QMainWindow):
         conn.close()
         tasks = []
         for r in rows:
+            # Skip overdue
+            try:
+                if r["time"] and r["time_type"] == "Saat Belirt":
+                    hh, mm = map(int, r["time"].split(":"))
+                    tdt = datetime.combine(today, time(hh, mm))
+                else:
+                    tdt = datetime.combine(today, time(12, 0))
+                if tdt < now - overdue_threshold:
+                    continue
+            except:
+                pass
             if r["done"] and r["completed_time"]:
                 try:
                     completed_dt = datetime.strptime(r["completed_time"], "%Y-%m-%d %H:%M:%S")
