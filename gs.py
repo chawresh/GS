@@ -64,7 +64,12 @@ DEFAULT_SETTINGS = {
     "notifications_enabled": True,
     "completed_task_timeout": 4,  # hours
     "clock_format": "24 Saat",
-    "auto_refresh": True
+    "auto_refresh": True,
+    "notification_duration": 10,  # seconds
+    "day_start": "08:00",
+    "day_end": "20:00",
+    "night_start": "20:00",
+    "night_end": "08:00"
 }
 
 # Themes
@@ -277,6 +282,7 @@ class NotificationDialog(QDialog):
         super().__init__(parent)
         font_size = parent.settings.get("font_size", 14) if parent else 14
         self.task_id = task_id
+        duration = parent.settings.get("notification_duration", 10) if parent else 10
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setMinimumSize(450, 250)
@@ -343,7 +349,7 @@ class NotificationDialog(QDialog):
         layout.addWidget(dismiss_btn, alignment=Qt.AlignCenter)
 
         self.timer = QTimer(self)
-        self.timer.setInterval(10000)
+        self.timer.setInterval(duration * 1000)
         self.timer.timeout.connect(self.accept)
         self.timer.start()
 
@@ -893,6 +899,15 @@ class PatientTaskApp(QMainWindow):
 
         self.refresh_all()
 
+    def parse_time(self, time_str):
+        if not time_str:
+            return time(8, 0)
+        try:
+            hh, mm = map(int, time_str.split(":"))
+            return time(hh, mm)
+        except:
+            return time(8, 0)
+
     def build_tasks_tab(self):
         w = QWidget()
         layout = QVBoxLayout(w)
@@ -1222,6 +1237,7 @@ class PatientTaskApp(QMainWindow):
     def build_settings_tab(self):
         w = QWidget()
         l = QFormLayout(w)
+        font_size = self.settings.get("font_size", 14)
         self.theme_combo = QComboBox()
         self.theme_combo.addItems(["Galatasaray", "Koyu"])
         self.theme_combo.setCurrentText(self.settings.get("theme", "Galatasaray"))
@@ -1255,6 +1271,37 @@ class PatientTaskApp(QMainWindow):
         self.auto_refresh.setChecked(self.settings.get("auto_refresh", True))
         self.auto_refresh.stateChanged.connect(self.on_auto_refresh_changed)
         l.addRow("Tablo Otomatik Yenileme", self.auto_refresh)
+
+        self.notification_duration_spin = QSpinBox()
+        self.notification_duration_spin.setRange(5, 60)
+        self.notification_duration_spin.setValue(self.settings.get("notification_duration", 10))
+        self.notification_duration_spin.valueChanged.connect(self.on_notification_duration_changed)
+        l.addRow("Bildirim Süresi (saniye)", self.notification_duration_spin)
+
+        # Vardiya saatleri
+        self.day_start_edit = QTimeEdit()
+        self.day_start_edit.setDisplayFormat("HH:mm")
+        self.day_start_edit.setTime(QtCore.QTime.fromString(self.settings.get("day_start", "08:00"), "HH:mm"))
+        self.day_start_edit.timeChanged.connect(self.on_day_start_changed)
+        l.addRow("Gündüz Vardiyası Başlangıç", self.day_start_edit)
+
+        self.day_end_edit = QTimeEdit()
+        self.day_end_edit.setDisplayFormat("HH:mm")
+        self.day_end_edit.setTime(QtCore.QTime.fromString(self.settings.get("day_end", "20:00"), "HH:mm"))
+        self.day_end_edit.timeChanged.connect(self.on_day_end_changed)
+        l.addRow("Gündüz Vardiyası Bitiş", self.day_end_edit)
+
+        self.night_start_edit = QTimeEdit()
+        self.night_start_edit.setDisplayFormat("HH:mm")
+        self.night_start_edit.setTime(QtCore.QTime.fromString(self.settings.get("night_start", "20:00"), "HH:mm"))
+        self.night_start_edit.timeChanged.connect(self.on_night_start_changed)
+        l.addRow("Gece Vardiyası Başlangıç", self.night_start_edit)
+
+        self.night_end_edit = QTimeEdit()
+        self.night_end_edit.setDisplayFormat("HH:mm")
+        self.night_end_edit.setTime(QtCore.QTime.fromString(self.settings.get("night_end", "08:00"), "HH:mm"))
+        self.night_end_edit.timeChanged.connect(self.on_night_end_changed)
+        l.addRow("Gece Vardiyası Bitiş", self.night_end_edit)
 
         self.theme_preview = QLabel("Tema önizlemesi")
         self.theme_preview.setFixedHeight(80)
@@ -1584,6 +1631,8 @@ class PatientTaskApp(QMainWindow):
             self.update_selected_patient()
 
     def is_daytime_task(self, t):
+        day_start = self.parse_time(self.settings.get("day_start", "08:00"))
+        day_end = self.parse_time(self.settings.get("day_end", "20:00"))
         if t["time_type"] == "Gün İçinde":
             return True
         if t["time_type"] == "Akşam":
@@ -1592,8 +1641,6 @@ class PatientTaskApp(QMainWindow):
             try:
                 hh, mm = map(int, t["time"].split(":"))
                 t_time = time(hh, mm)
-                day_start = time(8, 0)
-                day_end = time(20, 0)
                 return day_start <= t_time < day_end
             except:
                 pass
@@ -1623,8 +1670,8 @@ class PatientTaskApp(QMainWindow):
         completed_night = []
         upcoming_night = []
         cancelled_night = []
-        day_start = time(8, 0)
-        day_end = time(20, 0)
+        day_start = self.parse_time(self.settings.get("day_start", "08:00"))
+        day_end = self.parse_time(self.settings.get("day_end", "20:00"))
         timeout_hours = self.settings.get("completed_task_timeout", 4)
         overdue_threshold = timedelta(hours=24)
 
@@ -1885,6 +1932,8 @@ class PatientTaskApp(QMainWindow):
         if not self.settings.get("notifications_enabled", True):
             return
         now = datetime.now()
+        day_start = self.parse_time(self.settings.get("day_start", "08:00"))
+        night_start = self.parse_time(self.settings.get("night_start", "20:00"))
         conn = get_conn()
         cur = conn.cursor()
         cur.execute("SELECT t.*, p.name, p.surname, p.photo FROM tasks t LEFT JOIN patients p ON p.room_number=t.room_number WHERE done=0 AND cancelled=0 AND (notified=0 OR notified IS NULL)")
@@ -1896,9 +1945,9 @@ class PatientTaskApp(QMainWindow):
                     hh, mm = map(int, r["time"].split(":"))
                     tdt = datetime.combine(datetime.strptime(r["date"], "%Y-%m-%d").date() if r["date"] else date.today(), time(hh, mm))
                 elif r["time_type"] == "Gün İçinde":
-                    tdt = datetime.combine(datetime.strptime(r["date"], "%Y-%m-%d").date() if r["date"] else date.today(), time(8, 0))
+                    tdt = datetime.combine(datetime.strptime(r["date"], "%Y-%m-%d").date() if r["date"] else date.today(), day_start)
                 elif r["time_type"] == "Akşam":
-                    tdt = datetime.combine(datetime.strptime(r["date"], "%Y-%m-%d").date() if r["date"] else date.today(), time(20, 0))
+                    tdt = datetime.combine(datetime.strptime(r["date"], "%Y-%m-%d").date() if r["date"] else date.today(), night_start)
                 
                 if tdt:
                     diff = (tdt - now).total_seconds()
@@ -2085,6 +2134,25 @@ class PatientTaskApp(QMainWindow):
             QLineEdit {{ color: {text}; background: {t['table_bg']}; border: 1px solid {t['button']}; font-size: {font_size}px; }}
             QDateEdit {{ color: #000000; background: white; font-size: {font_size}px; }}
             QTimeEdit {{ color: #000000; background: white; font-size: {font_size}px; }}
+            QSpinBox {{ color: #000000; background: white; font-size: {font_size}px; }}
+        """)
+        # Özel tablo arka planları: Çok açık gri (#F5F5F5)
+        light_gray = "#F5F5F5"
+        self.patient_task_table.setStyleSheet(f"""
+            QTableWidget {{ background: {light_gray}; color: {text}; font-size: {font_size}px; }}
+            QTableWidget::item {{ background: {light_gray}; color: {text}; }}
+        """)
+        self.tasks_table.setStyleSheet(f"""
+            QTableWidget {{ background: {light_gray}; color: {text}; font-size: {font_size}px; }}
+            QTableWidget::item {{ background: {light_gray}; color: {text}; }}
+        """)
+        self.archive_patients.setStyleSheet(f"""
+            QTableWidget {{ background: {light_gray}; color: {text}; font-size: {font_size}px; }}
+            QTableWidget::item {{ background: {light_gray}; color: {text}; }}
+        """)
+        self.archive_tasks.setStyleSheet(f"""
+            QTableWidget {{ background: {light_gray}; color: {text}; font-size: {font_size}px; }}
+            QTableWidget::item {{ background: {light_gray}; color: {text}; }}
         """)
         self.update_theme_preview()
 
@@ -2130,6 +2198,30 @@ class PatientTaskApp(QMainWindow):
     def on_auto_refresh_changed(self, state):
         self.settings["auto_refresh"] = bool(state)
         save_settings(self.settings)
+
+    def on_notification_duration_changed(self, val):
+        self.settings["notification_duration"] = val
+        save_settings(self.settings)
+
+    def on_day_start_changed(self, time_val):
+        self.settings["day_start"] = time_val.toString("HH:mm")
+        save_settings(self.settings)
+        self.refresh_all()
+
+    def on_day_end_changed(self, time_val):
+        self.settings["day_end"] = time_val.toString("HH:mm")
+        save_settings(self.settings)
+        self.refresh_all()
+
+    def on_night_start_changed(self, time_val):
+        self.settings["night_start"] = time_val.toString("HH:mm")
+        save_settings(self.settings)
+        self.refresh_all()
+
+    def on_night_end_changed(self, time_val):
+        self.settings["night_end"] = time_val.toString("HH:mm")
+        save_settings(self.settings)
+        self.refresh_all()
 
     def update_theme_preview(self):
         t = THEMES.get(self.theme_combo.currentText(), THEMES["Galatasaray"])
